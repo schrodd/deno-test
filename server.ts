@@ -1,21 +1,18 @@
-import { createApp } from "https://deno.land/x/servest/mod.ts";
+import { Application, Context, MongoClient, config } from './deps.ts'
+const { MONGOURL } = config()
 
-const app = createApp();
-app.handle("/", async (req) => {
-  await req.respond({
-    status: 200,
-    headers: new Headers({
-      "content-type": "text/html; charset=UTF-8",
-    }),
-    body: ReactDOMServer.renderToString(
-      <html>
-        <head>
-          <meta charSet="utf-8" />
-          <title>servest</title>
-        </head>
-        <body>Hello Servest!</body>
-      </html>,
-    ),
-  });
+
+// Connect to DB
+const client = new MongoClient()
+await client.connect(MONGOURL)
+const db = client.database("deno")
+const userModel = db.collection("users")
+
+const app = new Application()
+
+app.use((ctx:Context) => {
+  ctx.response.status = 200
+  ctx.response.body = "Hello World!"
 });
-app.listen({ port: 8888 });
+
+await app.listen({ port: 8080 })
